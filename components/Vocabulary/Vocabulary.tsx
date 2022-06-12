@@ -10,7 +10,7 @@ export function UnicodeToText(str:string){
 }
 
 export default function Vocabulary(props){
-    const reading = UnicodeToText(JSON.parse(props.vocabulary.reading.replaceAll("'",'"'))[0]["reading"])
+    const reading = UnicodeToText(props.vocabulary.reading.split(",")[0])
     return  <div className="bg-vocab rounded text-left my-[0.5px] p-2">
         <Link href={"/vocabulary/"+props.vocabulary.jpname}>
             <a>
