@@ -8,12 +8,16 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.7",
+    "cli-progress": "^3.11.1",
+    "html-react-parser": "^1.4.14",
     "mariadb": "^3.0.0",
     "next": "latest",
     "postcss": "^8.4.14",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "redis": "^4.1.0",
     "sequelize": "^6.19.2",
+    "sharp": "^0.30.6",
     "tailwindcss": "^3.0.24"
   },
   "devDependencies": {

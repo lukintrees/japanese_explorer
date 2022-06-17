@@ -11,7 +11,7 @@
     text-shadow: 0 2px 0 rgba(0,0,0,.3);
 }
 .ja-image-shadow {
-    filter: drop-shadow(0 2px 0 rgba(0,0,0,.3));
+    filter: invert(1) drop-shadow(0 2px 0 rgba(0,0,0,.3));
 }
 .bg-kanji {
     background: linear-gradient(180deg,#f0a,#dd0093);

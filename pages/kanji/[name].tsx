@@ -1,7 +1,7 @@
 import { GetStaticProps, GetStaticPaths } from 'next'
 import NavBar from '../../components/Decorate/NavBar'
 import KanjiPage from '../../components/Kanji/KanjiPage'
-import { getKanji, getKanjiByJPName, getRadicalsById, getVocabularyById} from '../../utils/database'
+import { getKanji, getKanjiBySlug, getSubjectById} from '../../utils/database'
 
 function kanjiId(props){
   const radicals = JSON.parse(props.radicals)
@@ -19,28 +19,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
   var kanji = await getKanji()
   var paths = []
   for(var i = 0;i < kanji.length;i++){
-    paths.push({params:{name:kanji[i]["jpname"]}})
+    paths.push({params:{name:kanji[i]["data"]["slug"]}})
   }
   return {paths,fallback:false}
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const kanji = await getKanjiByJPName(context.params.name.toString())
+  const kanji = (await getKanjiBySlug(context.params.name.toString()))[0]
   const radicals = []
-  const vocabulary = []
-  var temp = kanji["radicals"].split(",")
+  var vocabulary;
+  var temp = kanji["data"]["component_subject_ids"]
   for(var i = 0;i < temp.length;i++){
-    var temp1 = await getRadicalsById(parseInt(temp[i]))
+    var temp1 = (await getSubjectById(temp[i]))[0]
     radicals.push(temp1)
   }
-  if(kanji["invocabulary"] != ""){
-    temp = kanji["invocabulary"].split(",")
+  if(kanji["data"]["amalgamation_subject_ids"] != []){
+    vocabulary = []
+    temp = kanji["data"]["amalgamation_subject_ids"]
     for(var i = 0;i < temp.length;i++){
-      var temp1 = await getVocabularyById(parseInt(temp[i]))
+      var temp1 = (await getSubjectById(temp[i]))[0]
       vocabulary.push(temp1)
     }
   }else{
-    vocabulary.push("None")
+    vocabulary = "None"
   }
   return {props:{radicals:JSON.stringify(radicals),kanji:JSON.stringify(kanji),vocabulary:JSON.stringify(vocabulary)}} 
 }
