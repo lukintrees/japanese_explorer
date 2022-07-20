@@ -19,7 +19,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   var kanji = await getKanji()
   var paths = []
   for(var i = 0;i < kanji.length;i++){
-    paths.push({params:{name:kanji[i]["data"]["slug"]}})
+    paths.push({params:{name:kanji[i]['slug']}})
   }
   return {paths,fallback:false}
 }

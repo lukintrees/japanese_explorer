@@ -18,9 +18,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   var vocabulary = await getVocabulary()
   var paths = []
   for(var i = 0;i < vocabulary.length;i++){
-    if(vocabulary[i]["data"]["hidden_at"] == null){
-      paths.push({params:{name:vocabulary[i]["data"]["characters"]}})
-    }
+    paths.push({params:{name:vocabulary[i]["slug"]}})
   }
   return {paths,fallback:false}
 }

@@ -1,155 +1,65 @@
-const { Sequelize, DataTypes, Model, QueryTypes } = require("sequelize");
-const {createClient} = require("redis")
-const cliProgress = require('cli-progress');
-const sequelize = new Sequelize("wanikani", "node", "password", {
-  host: "localhost",
-  dialect: "mariadb",
-});
-const redis = createClient()
-class Subject extends Model {}
-Subject.init(
-  {
+const { Sequelize, QueryTypes, DataTypes, Model, Op } = require('sequelize');
+
+const sequelize = new Sequelize('wanikani', 'node', 'password', {
+    host: "localhost",
+    dialect: "postgres"
+})
+const mariadb = new Sequelize('wanikani', 'node', 'password', {
+    host: 'localhost',
+    dialect: 'mariadb'
+})
+class Subject extends Model{}
+Subject.init({
     id: {
-      type: DataTypes.SMALLINT(6),
-      defaultValue: 1,
-      primaryKey: true,
+        type: DataTypes.SMALLINT,
+        primaryKey: true
     },
-    level: {
-      type: DataTypes.SMALLINT(6),
-    },
-    object: {
-      type: DataTypes.STRING(128),
-    },
-    url: {
-      type: DataTypes.STRING(1024),
-    },
-    data_updated_at: {
-      type: DataTypes.STRING(128),
-    },
-    data: {
-      type: DataTypes.TEXT("long"),
-    },
-  },
-  { sequelize, timestamps: false, tableName: "Subject" }
-);
+    object: DataTypes.STRING(128),
+    url: DataTypes.STRING(512),
+    data_updated_at: DataTypes.STRING(128),
+    data: DataTypes.JSONB
+},{timestamps:false,sequelize:sequelize,tableName:"subject"})
 
 async function getRadicalsByLevel(level) {
-  await redis.connect()
-  const keys = await redis.keys("radical:"+level+":*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getKanjiByLevel(level) {
-  await redis.connect()
-  const keys = await redis.keys("kanji:"+level+":*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getVocabularyByLevel(level) {
-  await redis.connect()
-  const keys = await redis.keys("vocabulary:"+level+":*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getSubjectById(id) {
-  await redis.connect()
-  const keys = await redis.keys("*:*:"+id+":*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getRadicals() {
-  await redis.connect()
-  const keys = await redis.keys("radical:*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getRadicalBySlug(slug) {
-  await redis.connect()
-  const keys = await redis.keys("radical:*:*:"+slug)
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getKanji() {
-  await redis.connect()
-  const keys = await redis.keys("kanji:*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getKanjiBySlug(slug) {
-  await redis.connect()
-  const keys = await redis.keys("kanji:*:*:"+slug)
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getVocabulary() {
-  await redis.connect()
-  const keys = await redis.keys("vocabulary:*")
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
-}
-async function getVocabularyBySlug(slug) {
-  await redis.connect()
-  const keys = await redis.keys("vocabulary:*:*:"+slug)
-  const data = []
-  for (let i = 0; i < keys.length; i++) {
-    data.push(JSON.parse(await redis.json.get(keys[i])))
-  }
-  await redis.disconnect()
-  return data
+  return sequelize.query("select * from wanikani.subject where object = 'radical' and data -> 'level' = '"+level+"';", {type:QueryTypes.SELECT})
 }
 
-async function parseLevel(){
-  const data = await sequelize.query(
-    'SELECT * FROM Subject',
-    { type: QueryTypes.SELECT }
-  );
-  const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-  bar1.start(data.length,0)
-  const redis = createClient()
-  await redis.connect()
-  for(var i = 0;i<data.length;i++){
-    const subject = data[i]
-    await redis.json.set(subject.object+":"+subject.data.level+":"+subject.id+":"+subject.data.slug,".",JSON.stringify(subject))
-    bar1.update(i+1)
-  }
-  bar1.stop()
+async function getKanjiByLevel(level) {
+  return sequelize.query("select * from wanikani.subject where object = 'kanji' and data -> 'level' = '"+level+"';", {type:QueryTypes.SELECT})
 }
+
+async function getVocabularyByLevel(level) {
+  return sequelize.query("select * from wanikani.subject where object = 'vocabulary' and data -> 'level' = '"+level+"';", {type:QueryTypes.SELECT})
+}
+
+async function getSubjectById(id) {
+  return sequelize.query("select * from wanikani.subject where id = "+ id + ";", {type:QueryTypes.SELECT})
+}
+
+async function getRadicals() {
+  return sequelize.query("select data -> 'slug' as slug from wanikani.subject where object = 'radical';", {type:QueryTypes.SELECT})
+}
+
+async function getKanji() {
+  return sequelize.query("select data -> 'slug' as slug from wanikani.subject where object = 'kanji';", {type:QueryTypes.SELECT})
+}
+
+async function getVocabulary() {
+  return sequelize.query("select data -> 'slug' as slug from wanikani.subject where object = 'vocabulary';", {type:QueryTypes.SELECT})
+}
+
+async function getRadicalBySlug(slug) {
+  return sequelize.query("select * from wanikani.subject where object = 'radical' and data -> 'slug' ? '"+slug+"';", {type:QueryTypes.SELECT})
+}
+
+async function getKanjiBySlug(slug) {
+  return sequelize.query("select * from wanikani.subject where object = 'kanji' and data -> 'slug' ? '"+slug+"';", {type:QueryTypes.SELECT})
+}
+
+async function getVocabularyBySlug(slug) {
+  return sequelize.query("select * from wanikani.subject where object = 'vocabulary' and data -> 'slug' ? '"+slug+"';", {type:QueryTypes.SELECT})
+}
+
 export {
   getRadicalsByLevel,
   getKanjiByLevel,
@@ -162,3 +72,6 @@ export {
   getVocabulary,
   getVocabularyBySlug,
 };
+  
+
+

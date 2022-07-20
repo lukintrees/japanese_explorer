@@ -12,20 +12,22 @@
     "html-react-parser": "^1.4.14",
     "mariadb": "^3.0.0",
     "next": "latest",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
     "postcss": "^8.4.14",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "redis": "^4.1.0",
     "sequelize": "^6.19.2",
     "sharp": "^0.30.6",
-    "tailwindcss": "^3.0.24"
+    "tailwindcss": "^2.0.4"
   },
   "devDependencies": {
     "@types/node": "^12.12.21",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
     "eslint": "8.16.0",
-    "eslint-config-next": "12.1.6",
+    "eslint-config-next": "^0.2.4",
     "typescript": "4.6.4"
   }
 }

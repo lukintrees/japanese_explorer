@@ -18,7 +18,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   var radicals = await getRadicals()
   var paths = []
   for(var i = 0;i < radicals.length;i++){
-    paths.push({params:{name:radicals[i]["data"]["slug"]}})
+    paths.push({params:{name:radicals[i]["slug"]}})
   }
   return {paths,fallback:false}
 }
